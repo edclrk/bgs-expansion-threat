@@ -1,6 +1,7 @@
 import requests
 
 
+system_of_concern = 'Negrito'
 # we expect systems to be unique by name
 def get_system(json_systems, name):
     matching_system = [system for system in json_systems if system['name'] == name]
@@ -8,17 +9,26 @@ def get_system(json_systems, name):
         return matching_system[0]
     else:
         return []
-    # return matching_system[0]
-    # return [system for system in json_systems if system['name'] == name][0]
 
+def get_faction(json_factions, name):
+    matching_faction = [faction for faction in json_factions if faction['name'] == name]
+    if matching_faction:
+        return matching_faction[0]
+    else:
+        return []
 
 # r = requests.get('https://api.github.com/events')
 r = requests.get(
-    'https://www.edsm.net/api-v1/cube-systems?systemName=Negrito&size=30&showInformation=1&showCoordinates=1&showId=1')
-print(r.status_code)
-# print(r.json())
-
+    'https://www.edsm.net/api-v1/cube-systems?systemName=' + system_of_concern +
+    '&size=30&showInformation=1&showCoordinates=1&showId=1')
+# print(r.status_code)
 systems = r.json()
+print('Processing ' + str(len(systems)) + ' systems')
+
+factions_system_concern_request = requests.get('https://www.edsm.net/api-system-v1/factions?systemName=' + system_of_concern)
+factions_system_concern = factions_system_concern_request.json()["factions"]
+print('Factions in System of Concern:')
+print(factions_system_concern)
 
 # exioce = get_system(systems, 'Exioce')
 # if exioce:
@@ -43,6 +53,11 @@ for system in systems:
             # print(faction["name"])
             if faction["influence"] > 0.60:
                 # now check if faction is already present is system of concern, if so, skip it
+                if get_faction(factions_system_concern, faction["name"]):
+                    print('Ignoring ' + system["name"] + ' - ' + faction["name"] + ', already in system of concern')
+                    print()
+                    continue
+
 
                 # now check if system of concern is closest faction with less than 7 factions
                 print(system["name"])
