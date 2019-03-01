@@ -23,6 +23,11 @@ def add_system_list_to_cache(systems):
         systems_cache.append(system)
 
 
+def add_system_factions_list_to_cache(system_factions):
+    for system_faction in system_factions:
+        systems_cache.append(system_faction)
+
+
 def get_local_systems(system_name):
     cached_system = get_system(systems_cache, system_name)
     if cached_system:
@@ -36,8 +41,16 @@ def get_local_systems(system_name):
         return local_systems
 
 
+def get_system_factions(system_name):
+    system_factions_request = requests.get('https://www.edsm.net/api-system-v1/factions?systemName=' + system_name)
+    system_factions = system_factions_request.json()
+    add_system_factions_list_to_cache(system_factions)
+    return system_factions
+
+
 system_of_concern = 'Negrito'
 systems_cache = []
+system_factions_cache = []
 
 local_systems = get_local_systems(system_of_concern)
 print('Processing ' + str(len(local_systems)) + ' systems')
@@ -51,8 +64,9 @@ for system in local_systems:
     if system['information']:
         # print(system["information"])
 
-        factions_request = requests.get('https://www.edsm.net/api-system-v1/factions?systemName=' + system["name"])
-        factions = factions_request.json()
+        # factions_request = requests.get('https://www.edsm.net/api-system-v1/factions?systemName=' + system["name"])
+        # factions = factions_request.json()
+        factions = get_system_factions(system["name"])
         # print('Factions: ')
         for faction in factions["factions"]:
             # print(faction["name"])
