@@ -1,7 +1,6 @@
 import requests
 
 
-system_of_concern = 'Negrito'
 # we expect systems to be unique by name
 def get_system(json_systems, name):
     matching_system = [system for system in json_systems if system['name'] == name]
@@ -10,6 +9,7 @@ def get_system(json_systems, name):
     else:
         return []
 
+
 def get_faction(json_factions, name):
     matching_faction = [faction for faction in json_factions if faction['name'] == name]
     if matching_faction:
@@ -17,32 +17,37 @@ def get_faction(json_factions, name):
     else:
         return []
 
-# r = requests.get('https://api.github.com/events')
-r = requests.get(
-    'https://www.edsm.net/api-v1/cube-systems?systemName=' + system_of_concern +
-    '&size=30&showInformation=1&showCoordinates=1&showId=1')
-# print(r.status_code)
-systems = r.json()
-print('Processing ' + str(len(systems)) + ' systems')
+
+def add_system_list_to_cache(systems):
+    for system in systems:
+        systems_cache.append(system)
+
+
+def get_local_systems(system_name):
+    cached_system = get_system(systems_cache, system_name)
+    if cached_system:
+        return cached_system
+    else:
+        r = requests.get(
+            'https://www.edsm.net/api-v1/cube-systems?systemName=' + system_of_concern +
+            '&size=30&showInformation=1&showCoordinates=1&showId=1')
+        local_systems = r.json()
+        add_system_list_to_cache(local_systems)
+        return local_systems
+
+
+system_of_concern = 'Negrito'
+systems_cache = []
+
+local_systems = get_local_systems(system_of_concern)
+print('Processing ' + str(len(local_systems)) + ' systems')
 
 factions_system_concern_request = requests.get('https://www.edsm.net/api-system-v1/factions?systemName=' + system_of_concern)
 factions_system_concern = factions_system_concern_request.json()["factions"]
 print('Factions in System of Concern:')
 print(factions_system_concern)
 
-# exioce = get_system(systems, 'Exioce')
-# if exioce:
-#     print(exioce)
-#
-# negrito = get_system(systems, 'Negrito')
-# if negrito:
-#     print(negrito)
-
-
-for system in systems:
-    # print(system)
-    # print(system["name"])
-
+for system in local_systems:
     if system['information']:
         # print(system["information"])
 
@@ -59,7 +64,7 @@ for system in systems:
                     continue
 
 
-                # now check if system of concern is closest faction with less than 7 factions
+                # now check if system of concern is closest to faction with less than 7 factions
                 print(system["name"])
                 print(faction["name"] + ',  influence: ' + str(faction["influence"]) + ' isPlayer: ' + str(faction["isPlayer"]))
                 print()
