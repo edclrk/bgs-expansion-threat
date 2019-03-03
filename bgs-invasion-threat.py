@@ -1,7 +1,8 @@
 import requests
 import logging
 
-logging.basicConfig(level=logging.INFO)
+# for now simplify logging format until some things are controlled by arguments...
+logging.basicConfig(level=logging.INFO, format='%(message)s')
 
 # look for a system by name in a list, we expect systems to be unique by name
 def get_system(json_systems, name):
@@ -124,7 +125,7 @@ def system_will_expand_to(faction_name, threat_system, system_of_concern):
     return False
 
 
-system_of_concern = 'negrito'
+system_of_concern = 'gongalungul'
 systems_cache = []
 system_factions_cache = []
 
