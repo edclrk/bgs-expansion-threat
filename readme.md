@@ -1,3 +1,32 @@
+Setup
+==========
+
+Install Python 3 if you have not already
+Note: Instructions below are for Mac/Linux
+
+Set up the Python virtual env
+```bash
+python3 -m venv ./venv
+```
+
+Download dependencies via pip
+Note, this installs to the local virtual environment in the ./venv directory
+```bash
+./venv/bin/python3 -m pip install -r requirements.txt
+```
+
+
+Execution
+=============
+Manually update the system_of_concern around line 128 and execute
+```bash
+./venv/bin/python bgs-invasion-threat.py
+```
+
+
+Background
+==========
+
 A little requirements gathering if we wanted a process to check our "expansion threat"
 For a given system (i.e. Negrito)
 Get All Systems within designated LY from the designated system
@@ -25,3 +54,5 @@ https://www.edsm.net/api-system-v1/factions?systemName=Exioce
 
 Requests library:
 http://docs.python-requests.org/en/latest/
+
+
