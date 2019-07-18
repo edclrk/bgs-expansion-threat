@@ -10,6 +10,7 @@ python3 -m venv ./venv
 ```
 
 Download dependencies via pip
+
 Note, this installs to the local virtual environment in the ./venv directory
 ```bash
 ./venv/bin/python3 -m pip install -r requirements.txt
