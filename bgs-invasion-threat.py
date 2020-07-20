@@ -1,8 +1,21 @@
-import requests
-import logging
+import requests, logging, os
 
 # for now simplify logging format until some things are controlled by arguments...
 logging.basicConfig(level=logging.INFO, format='%(message)s')
+clear = lambda: os.system('cls')
+
+systems_cache = []
+system_factions_cache = []
+systems_to_check = []
+total_system_count = 0
+while not 'done' in systems_to_check:
+    clear()
+    print('Current Systems List:')
+    for system in systems_to_check:
+        print(system)
+    systems_to_check.append(input('input system to add to systems list: ').rstrip('\n'))
+systems_to_check.pop()
+clear()
 
 # look for a system by name in a list, we expect systems to be unique by name
 def get_system(json_systems, name):
@@ -124,41 +137,53 @@ def system_will_expand_to(faction_name, threat_system, system_of_concern):
             pass
     return False
 
+def processSystem(system_of_concern):
+    #system_of_concern = 'hip 9492'
+    global systems_cache
+    global system_factions_cache
+    global total_system_count
+    systems_cache = []
+    system_factions_cache = []
 
-system_of_concern = 'gongalungul'
-systems_cache = []
-system_factions_cache = []
 
-local_systems = get_local_systems(system_of_concern)
-print('Determining expansion threats for ' + system_of_concern)
-print('Processing ' + str(len(local_systems)) + ' systems\n')
-
-factions_system_concern = get_system_factions(system_of_concern)["factions"]
-logging.debug('Factions in System of Concern:')
-logging.debug(factions_system_concern)
-logging.debug('')
-
-for local_system in local_systems:
-    logging.debug(local_system["name"] + ': ')
-    if local_system['information']:
-        factions = get_system_factions(local_system["name"])
-        for faction in factions["factions"]:
-            if faction["influence"] > 0.60:
-                # now check if faction is already present in system of concern, if so, skip it
-                if get_faction(factions_system_concern, faction["name"]):
-                    logging.debug('Ignoring ' + local_system["name"] + ' - ' + faction["name"] + ', already in system of concern\n')
-                    continue
-
-                # now check if system of concern is closest to faction with less than 7 factions
-                if system_will_expand_to(faction["name"], local_system["name"], system_of_concern):
-                    print('THREAT: ' + local_system["name"] + ' - ' + faction["name"] + ',  influence: ' + str(faction["influence"]) + ' isPlayer: ' + str(faction["isPlayer"]))
-                else:
-                    logging.info('IGNORE: ' + local_system["name"] + ' - ' + faction["name"] + ',  influence: ' + str(faction["influence"]) + ' isPlayer: ' + str(faction["isPlayer"]) + ', will expand elsewhere')
-
-        # print("No Faction threat detected")
-    else:
-        pass
-        logging.debug('System Not Populated')
+    local_systems = get_local_systems(system_of_concern)
+    total_system_count += len(local_systems)
+    print('--------------------------------------------------')
+    print('Determining expansion threats for ' + system_of_concern)
+    print('Processing ' + str(len(local_systems)) + ' systems, please wait....\n')
+    factions_system_concern = get_system_factions(system_of_concern)["factions"]
+    logging.debug('Factions in System of Concern:')
+    logging.debug(factions_system_concern)
     logging.debug('')
 
-print('\nDone')
+    for local_system in local_systems:
+        logging.debug(local_system["name"] + ': ')
+        if local_system['information']:
+            factions = get_system_factions(local_system["name"])
+            for faction in factions["factions"]:
+                if faction["influence"] > 0.60:
+                    # now check if faction is already present in system of concern, if so, skip it
+                    if get_faction(factions_system_concern, faction["name"]):
+                        logging.debug('Ignoring ' + local_system["name"] + ' - ' + faction["name"] + ', already in system of concern\n')
+                        continue
+
+                    # now check if system of concern is closest to faction with less than 7 factions
+                    if system_will_expand_to(faction["name"], local_system["name"], system_of_concern):
+                        print('THREAT: ' + local_system["name"] + ' - ' + faction["name"] + ',  influence: ' + str(round(faction["influence"] * 100, 1)) + '% isPlayer: ' + str(faction["isPlayer"]))
+                    else:
+                        logging.info('IGNORE: ' + local_system["name"] + ' - ' + faction["name"] + ',  influence: ' + str(round(faction["influence"] * 100, 1)) + '% isPlayer: ' + str(faction["isPlayer"]) + ', will expand elsewhere')
+
+            # print("No Faction threat detected")
+        else:
+            pass
+            logging.debug('System Not Populated')
+        logging.debug('')
+
+print('Finding threats for these systems:')
+for system in systems_to_check:
+    print(system)
+
+for system in systems_to_check:
+    processSystem(system)
+print('\nDone Processing, ' + str(total_system_count) + " Processed")
+input()
